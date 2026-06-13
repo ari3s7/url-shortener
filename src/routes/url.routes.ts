@@ -1,9 +1,8 @@
 import { Router } from 'express';
+import { url } from '../controllers/url.controller';
 
 const router = Router();
 
-router.get('/', (req, res) => {
-    res.send('url routes working');
-});
+router.post('/', url);
 
 export default router;
