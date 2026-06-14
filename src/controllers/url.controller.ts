@@ -16,7 +16,7 @@ const url = async (req: Request, res: Response) => {
         error: "Invalid URL"
           });
      }
-        const shortCode = nanoid(6);
+        const shortCode = nanoid(7);
 
         try{
             const createdUrl = await prisma.url.create({
@@ -27,7 +27,7 @@ const url = async (req: Request, res: Response) => {
         });
 
         res.status(201).json({
-            createdUrl,
+            shortCode,
             shortUrl: `http://localhost:3000/${shortCode}`,
         });
         } catch (error) {
