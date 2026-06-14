@@ -27,7 +27,7 @@ const url = async (req: Request, res: Response) => {
         });
 
         res.status(201).json({
-            shortCode,
+            createdUrl,
             shortUrl: `http://localhost:3000/${shortCode}`,
         });
         } catch (error) {
@@ -81,7 +81,7 @@ const url = async (req: Request, res: Response) => {
         }
     }
 
-    const updateUrl = async (req: Request<RedirectParams>, res: Response) => {
+    const updateURL = async (req: Request<RedirectParams>, res: Response) => {
       const{ shortCode } = req.params;
       const { originalUrl } = req.body;
 
@@ -134,11 +134,11 @@ const url = async (req: Request, res: Response) => {
                 where: { shortCode },
             });
 
-            return res.status(204).json({ message: "URL deleted successfully" });
+            return res.send(204).json({ message: "URL deleted successfully" });
         } catch (error) {
             console.log(error);
             res.status(500).json({ error: "Failed to delete URL" });
         }
     }
 
-    export {url, redirectUrl, statsUrl, updateUrl, deleteUrl}
+    export {url, redirectUrl, statsUrl, updateURL, deleteUrl}
