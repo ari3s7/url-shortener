@@ -1,6 +1,7 @@
 import  {prisma} from '../config/prisma';
 import { Request, Response } from 'express';
 import { nanoid } from 'nanoid';
+import { RedirectParams } from '../types/urlTypes';
 
 const url = async (req: Request, res: Response) => {
     
@@ -35,5 +36,26 @@ const url = async (req: Request, res: Response) => {
         }
         
     }
+    const redirectUrl = async (req: Request<RedirectParams>, res: Response) => {
+        const { shortCode } = req.params;
+        try {
+            const urlEntry = await prisma.url.findUnique({
+                where: { shortCode },
+            });
 
-    export {url}
+            if (!urlEntry) {
+                return res.status(404).json({ error: "URL not found" });
+            }
+
+            await prisma.url.update({
+                where: { shortCode },
+                data: { clicks: { increment: 1 } },
+            });
+
+            return res.redirect(urlEntry.originalUrl);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Failed to redirect URL" });
+        }
+    }
+    export {url, redirectUrl}
