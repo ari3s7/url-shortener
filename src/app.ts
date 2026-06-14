@@ -1,13 +1,11 @@
 import express from 'express';
 import urlRoutes from './routes/url.routes';
+import { urlLimiter } from './middleware/rateLimit';
 const app = express();
 
 app.use(express.json());
 
-app.get('/', (req, res) => {
-   res.send('Hello World!');
-})
 
-app.use("/api/urls", urlRoutes);
+app.use("/api/urls", urlLimiter, urlRoutes);
 
 export default app;
