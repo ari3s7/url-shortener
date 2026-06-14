@@ -46,16 +46,99 @@ const url = async (req: Request, res: Response) => {
             if (!urlEntry) {
                 return res.status(404).json({ error: "URL not found" });
             }
-
             await prisma.url.update({
                 where: { shortCode },
                 data: { clicks: { increment: 1 } },
             });
-
             return res.redirect(urlEntry.originalUrl);
         } catch (error) {
             console.error(error);
             res.status(500).json({ error: "Failed to redirect URL" });
         }
     }
-    export {url, redirectUrl}
+
+    const statsUrl = async (req: Request<RedirectParams>, res: Response) => {
+        const { shortCode } = req.params;
+        try{
+             const urlEntry = await prisma.url.findUnique({
+                where: { shortCode },
+            });
+
+            if (!urlEntry) {
+                return res.status(404).json({ error: "URL not found" });
+            }
+            
+            return res.json({
+                shortCode: urlEntry.shortCode,
+                originalUrl: urlEntry.originalUrl,
+                clicks: urlEntry.clicks,
+                createdAt: urlEntry.createdAt,
+                updatedAt: urlEntry.updatedAt,
+            })
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ error: "Failed to retrieve URL stats" });
+        }
+    }
+
+    const updateUrl = async (req: Request<RedirectParams>, res: Response) => {
+      const{ shortCode } = req.params;
+      const { originalUrl } = req.body;
+
+      if(!originalUrl) {
+        return res.status(400).json({ error: "originalUrl is required" });
+    }
+      try {
+           new URL(originalUrl)
+        } catch(error){
+            console.log(error);
+            return res.status(400).json({
+                error: "Invalid URL"
+            })
+        }
+    try{
+          const existingUrl = await prisma.url.findUnique({
+       where: { shortCode }
+     });
+
+     if (!existingUrl) {
+     return res.status(404).json({
+    error: "URL not found"
+       });
+}  
+        const updateUrl = await prisma.url.update({
+            where: { shortCode },
+            data: { originalUrl },
+        });
+        return res.json({
+            originalUrl: updateUrl.originalUrl
+        })
+     } catch(error) {
+        console.log(error);
+        res.status(500).json({ error: "Failed to update URL" });
+      }
+    }
+
+    const deleteUrl = async (req: Request<RedirectParams>, res: Response) => {
+        const { shortCode } = req.params;
+        try {
+            const existingUrl = await prisma.url.findUnique({
+                where: { shortCode },
+            });
+
+            if (!existingUrl) {
+                return res.status(404).json({ error: "URL not found" });
+            }
+
+            await prisma.url.delete({
+                where: { shortCode },
+            });
+
+            return res.status(204).json({ message: "URL deleted successfully" });
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ error: "Failed to delete URL" });
+        }
+    }
+
+    export {url, redirectUrl, statsUrl, updateUrl, deleteUrl}
