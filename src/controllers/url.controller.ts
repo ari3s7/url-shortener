@@ -50,8 +50,7 @@ const url = async (req: Request, res: Response) => {
         },
     });
 };
-
-        const cachedUrl = await redisClient.get(shortCode);
+    const cachedUrl = await redisClient.get(shortCode);
 
       if (cachedUrl) {
      await incrementClicks(shortCode)
