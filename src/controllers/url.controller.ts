@@ -110,7 +110,7 @@ const url = async (req: Request, res: Response) => {
     const updateURL = async (req: Request<RedirectParams>, res: Response) => {
       const{ shortCode } = req.params;
       const { originalUrl } = req.body;
-
+   
       if(!originalUrl) {
         return res.status(400).json({ error: "originalUrl is required" });
     }
@@ -136,9 +136,12 @@ const url = async (req: Request, res: Response) => {
             where: { shortCode },
             data: { originalUrl },
         });
+
+        await redisClient.del(shortCode);
         return res.json({
             originalUrl: updateUrl.originalUrl
         })
+        
      } catch(error) {
         console.log(error);
         res.status(500).json({ error: "Failed to update URL" });
@@ -159,6 +162,7 @@ const url = async (req: Request, res: Response) => {
             await prisma.url.delete({
                 where: { shortCode },
             });
+            await redisClient.del(shortCode);
 
             return res.send(204).json({ message: "URL deleted successfully" });
         } catch (error) {
