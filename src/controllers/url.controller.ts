@@ -2,6 +2,7 @@ import  {prisma} from '../config/prisma';
 import { Request, Response } from 'express';
 import { nanoid } from 'nanoid';
 import { RedirectParams } from '../types/urlTypes';
+import { redisClient } from '../config/redis';
 
 const url = async (req: Request, res: Response) => {
     
@@ -38,6 +39,27 @@ const url = async (req: Request, res: Response) => {
     }
     const redirectUrl = async (req: Request<RedirectParams>, res: Response) => {
         const { shortCode } = req.params;
+
+        const incrementClicks = async (shortCode: string) => {
+    await prisma.url.update({
+        where: { shortCode },
+        data: {
+            clicks: {
+                increment: 1,
+            },
+        },
+    });
+};
+
+        const cachedUrl = await redisClient.get(shortCode);
+
+      if (cachedUrl) {
+     await incrementClicks(shortCode)
+    console.log("Cache Hit");
+
+    return res.redirect(cachedUrl);
+}
+        console.log("Cache Miss");
         try {
             const urlEntry = await prisma.url.findUnique({
                 where: { shortCode },
@@ -46,10 +68,14 @@ const url = async (req: Request, res: Response) => {
             if (!urlEntry) {
                 return res.status(404).json({ error: "URL not found" });
             }
-            await prisma.url.update({
-                where: { shortCode },
-                data: { clicks: { increment: 1 } },
-            });
+
+            await redisClient.set(
+                shortCode,
+                urlEntry.originalUrl, {
+                    EX: 3600,
+                }
+            );
+           await incrementClicks(shortCode);
             return res.redirect(urlEntry.originalUrl);
         } catch (error) {
             console.error(error);

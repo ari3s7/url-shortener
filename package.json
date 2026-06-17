@@ -14,12 +14,14 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
+    "@types/redis": "^4.0.10",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-rate-limit": "^8.5.2",
     "nanoid": "^5.1.11",
-    "pg": "^8.21.0"
+    "pg": "^8.21.0",
+    "redis": "^6.0.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
